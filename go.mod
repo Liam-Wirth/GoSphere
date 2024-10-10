@@ -1,4 +1,4 @@
-module github.com/Liam-Wirth/Spinning-Shapes
+module github.com/Liam-Wirth/TerminalRenderer
 
 go 1.23.1
 
