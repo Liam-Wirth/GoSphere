@@ -1,11 +1,11 @@
 package main
 
 import (
+	"fmt"
+	"github.com/gdamore/tcell/v2"
 	"math"
 	"runtime"
 	"sync"
-
-	"github.com/gdamore/tcell/v2"
 )
 
 type Sphere struct {
@@ -20,6 +20,7 @@ type Sphere struct {
 	Points           []SpherePoint
 	Resolution       float64
 	ColorFunction    func(phi, theta float64) tcell.Color
+	cameraPos        Vec3
 }
 
 type SpherePoint struct {
@@ -32,6 +33,7 @@ func (sphere *Sphere) BuildSurface() {
 	numPhi := int(math.Pi/sphere.Resolution) + 1
 	totalPoints := numTheta * numPhi
 	sphere.Points = make([]SpherePoint, 0, totalPoints)
+	sphere.cameraPos = Vec3{0, 0, -sphere.DistanceFromCam}
 
 	for theta := 0.0; theta <= 2*math.Pi; theta += sphere.Resolution {
 		sinTheta := math.Sin(theta)
@@ -59,60 +61,54 @@ func (sphere *Sphere) BuildSurface() {
 }
 
 func (sphere *Sphere) Generate(screen tcell.Screen) {
+	runtime.GOMAXPROCS(runtime.NumCPU()) // Ensure all CPUs are used
+
 	aspectRatio := sphere.K2
 	K2 := sphere.K1 / aspectRatio
 
-	// Precompute rotation cosines and sines
 	cosA, sinA := math.Cos(sphere.A), math.Sin(sphere.A)
 	cosB, sinB := math.Cos(sphere.B), math.Sin(sphere.B)
 	cosC, sinC := math.Cos(sphere.C), math.Sin(sphere.C)
 
-	// Use concurrency to process points
 	numWorkers := runtime.NumCPU()
 	pointChunks := chunkPoints(sphere.Points, numWorkers)
 	var wg sync.WaitGroup
 
-	for _, chunk := range pointChunks {
+	for workerID, chunk := range pointChunks {
 		wg.Add(1)
-		go func(points []SpherePoint) {
+		go func(points []SpherePoint, workerID int) {
 			defer wg.Done()
+			fmt.Printf("Worker %d started\n", workerID)
 			for _, point := range points {
 				x := point.X
 				y := point.Y
 				z := point.Z
 
-				// Rotate the point
 				rotatedPoint := rotatePoint(x, y, z, cosA, sinA, cosB, sinB, cosC, sinC)
 
-				// Compute normal vector before rotation (for lighting)
 				nx := x / sphere.Radius
 				ny := y / sphere.Radius
 				nz := z / sphere.Radius
 				normal := Vec3{nx, ny, nz}
 
-				// Rotate the normal vector
 				rotatedNormal := rotateNormal(normal, cosA, sinA, cosB, sinB, cosC, sinC)
 
-				// Light direction from camera to point
-				cameraPos := Vec3{0, 0, -sphere.DistanceFromCam}
 				lightDir := Vec3{
-					X: cameraPos.X - rotatedPoint.X,
-					Y: cameraPos.Y - rotatedPoint.Y,
-					Z: cameraPos.Z - rotatedPoint.Z,
+					X: sphere.cameraPos.X - rotatedPoint.X,
+					Y: sphere.cameraPos.Y - rotatedPoint.Y,
+					Z: sphere.cameraPos.Z - rotatedPoint.Z,
 				}
 				lightDir = normalize(lightDir)
 
-				// Compute the dot product
 				dotProduct := rotatedNormal.X*lightDir.X + rotatedNormal.Y*lightDir.Y + rotatedNormal.Z*lightDir.Z
 
-				// Back-face culling
 				if dotProduct < 0 {
 					continue
 				}
 
 				zProj := rotatedPoint.Z + sphere.DistanceFromCam
 				if zProj == 0 {
-					continue // Avoid division by zero
+					continue
 				}
 				ooz := 1 / zProj
 				xp := int(float64(width)/2 + sphere.HorizontalOffset + sphere.K1*ooz*rotatedPoint.X)
@@ -123,23 +119,25 @@ func (sphere *Sphere) Generate(screen tcell.Screen) {
 					if ooz > zBuffer[idx] {
 						zBuffer[idx] = ooz
 
-						// Clamp intensity to [0, 1]
 						intensity := dotProduct
-						if intensity > 1 {
-							intensity = 1
+						if intensity > 10 {
+							intensity = 10
+						} else if intensity < 0.25 {
+							intensity = 0.25
 						}
 
-						// Adjust the point's color with the lighting intensity
 						color := adjustColorIntensity(point.Color, intensity)
 
-						buffer[idx] = '█'
+						buffer[idx] = '@'
 						colors[idx] = color
 					}
 				}
 			}
-		}(chunk)
+			fmt.Printf("Worker %d finished\n", workerID)
+		}(chunk, workerID)
 	}
 	wg.Wait()
+	fmt.Println("All workers finished")
 }
 
 func chunkPoints(points []SpherePoint, numChunks int) [][]SpherePoint {
@@ -193,8 +191,24 @@ func checkerboardColorFunction(phi, theta float64) tcell.Color {
 	v := int(theta / pi_16)
 
 	if (u+v)%2 == 0 {
-		return tcell.ColorPurple
+		return tcell.ColorFuchsia
 	} else {
-		return tcell.ColorWhite
+		return tcell.ColorBlack
 	}
+
+}
+func stripeColorFunction(phi, theta float64) tcell.Color {
+	if int(theta/(math.Pi/4))%2 == 0 {
+		return tcell.ColorRed
+	} else {
+		return tcell.ColorBlue
+	}
+}
+func gradientColorFunction(phi, theta float64) tcell.Color {
+	// Map phi from [0, π] to [0, 1]
+	t := phi / math.Pi
+	r := int32(255 * t)
+	g := int32(255 * (1 - t))
+	b := int32(128)
+	return tcell.NewRGBColor(r, g, b)
 }

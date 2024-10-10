@@ -76,7 +76,7 @@ func calculateForSurface(cubePoint Vec3, ch rune, color tcell.Color, rotations V
 	yp := int(float64(height)/2 + cube.K1*ooz*rotatedPoint.Y)
 	if xp >= 0 && xp < width && yp >= 0 && yp < height {
 		idx := xp + yp*width
-		if ooz > zBuffer[idx] {
+		if ooz > zBuffer[idx] { //is this not supposed to be cullign?!?!?!?gg
 			zBuffer[idx] = ooz
 			buffer[idx] = ch
 			colors[idx] = color

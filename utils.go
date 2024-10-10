@@ -30,3 +30,10 @@ func intensityToColor(intensity float64) tcell.Color {
 	return tcell.NewRGBColor(int32(r), int32(g), int32(b))
 }
 
+func selectCharacterBasedOnSlope(dotProduct float64) rune {
+    characters := []rune{ '▂', '▃', '▄', '▅', '▆', '▇', '█', '▉'}
+    index := int(dotProduct * float64(len(characters)-1))
+    return characters[index]
+}
+
+

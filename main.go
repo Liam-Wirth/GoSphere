@@ -1,6 +1,8 @@
 package main
 
 import (
+	"math"
+
 	"github.com/gdamore/tcell/v2"
 )
 
@@ -25,25 +27,26 @@ func main() {
 
 	// Initialize the cube (if needed)
 	cube1 := &Cube{
-		CubeWidth:        20,
-		DistanceFromCam:  100,
-		HorizontalOffset: -40, // Left side of the screen
+		CubeWidth:        4,
+		DistanceFromCam:  13,
+		HorizontalOffset: -46, // Left side of the screen
 		K1:               40,
-		IncrementSpeed:   0.3,
+		IncrementSpeed:   0.048,
 		CubeFaces:        defaultCubeFaces,
 	}
 
 	// Initialize the sphere
 	sphere := &Sphere{
-		Radius:           48,
-		DistanceFromCam:  54,
-		HorizontalOffset: 0,
+		Radius:           5,
+		DistanceFromCam:  13,
+		HorizontalOffset: 10,
 		VerticalOffset:   0,
 		K1:               20,
-		K2:               1.5,   // Aspect ratio
-		Resolution:       0.001, // Adjust for desired quality
+		K2:               1.7,   // Aspect ratio
+		Resolution:       0.020, // Adjust for desired quality
 		ColorFunction:    checkerboardColorFunction,
-                RotationSpeed: 0.03,
+                RotationSpeed: 0.004,
+                C: math.Pi/3,
 	}
 	sphere.BuildSurface()
 
