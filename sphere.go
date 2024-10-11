@@ -1,7 +1,8 @@
+// TODO: generalize a lot of this code/apply it to lighting calculations for other shapes
 package main
 
 import (
-	"fmt"
+	// "fmt"
 	"github.com/gdamore/tcell/v2"
 	"math"
 	"runtime"
@@ -61,6 +62,7 @@ func (sphere *Sphere) BuildSurface() {
 }
 
 func (sphere *Sphere) Generate(screen tcell.Screen) {
+   // TODO: decouple goroutines from sphere rendering and move it to general rendering function, right now cause cube is single threaded, rendering gets blocked if I do 2 shapes at a time
 	runtime.GOMAXPROCS(runtime.NumCPU()) // Ensure all CPUs are used
 
 	aspectRatio := sphere.K2
@@ -78,7 +80,6 @@ func (sphere *Sphere) Generate(screen tcell.Screen) {
 		wg.Add(1)
 		go func(points []SpherePoint, workerID int) {
 			defer wg.Done()
-			fmt.Printf("Worker %d started\n", workerID)
 			for _, point := range points {
 				x := point.X
 				y := point.Y
@@ -93,6 +94,9 @@ func (sphere *Sphere) Generate(screen tcell.Screen) {
 
 				rotatedNormal := rotateNormal(normal, cosA, sinA, cosB, sinB, cosC, sinC)
 
+            //  Dynamic lighting, I could theoretically map the x and y values to cursor position, and have it like that
+            // kinda cheating by zooming out lmao
+            // TODO: Uncouple light dir from camera pos in culling 
 				lightDir := Vec3{
 					X: sphere.cameraPos.X - rotatedPoint.X,
 					Y: sphere.cameraPos.Y - rotatedPoint.Y,
@@ -100,6 +104,9 @@ func (sphere *Sphere) Generate(screen tcell.Screen) {
 				}
 				lightDir = normalize(lightDir)
 
+            // this is because the dot product is technically the light direction, they are coupled currently because the code is written such that the light is "supposed" to be coming from the camera
+            // cause cpu i'm minimizing calculations, so if I move the light dir away from the camera pos too much, it fucks with culling/rendering
+            // hence why it looks all weird rn
 				dotProduct := rotatedNormal.X*lightDir.X + rotatedNormal.Y*lightDir.Y + rotatedNormal.Z*lightDir.Z
 
 				if dotProduct < 0 {
@@ -133,11 +140,9 @@ func (sphere *Sphere) Generate(screen tcell.Screen) {
 					}
 				}
 			}
-			fmt.Printf("Worker %d finished\n", workerID)
 		}(chunk, workerID)
 	}
 	wg.Wait()
-	fmt.Println("All workers finished")
 }
 
 func chunkPoints(points []SpherePoint, numChunks int) [][]SpherePoint {

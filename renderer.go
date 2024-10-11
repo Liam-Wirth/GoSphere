@@ -25,10 +25,10 @@ func renderLoop(s tcell.Screen, quit chan struct{}, cube1 *Cube, sphere *Sphere)
 			clearBuffers()
 
 			// Generate sphere
-			// sphere.Generate(s)
+			sphere.Generate(s)
 
 			// Optionally generate cube
-			cube1.Generate(s)
+			// cube1.Generate(s)
 
 			// Draw buffers to the screen
 			drawBuffers(s)
@@ -37,8 +37,8 @@ func renderLoop(s tcell.Screen, quit chan struct{}, cube1 *Cube, sphere *Sphere)
 			s.Show()
 
 			// Update sphere rotation angles
-			// sphere.B += sphere.RotationSpeed
-                        // sphere.A -= sphere.RotationSpeed
+			sphere.B += sphere.RotationSpeed
+                        sphere.A -= sphere.RotationSpeed
 
                         cube1.A += 0.05
                         cube1.B += 0.05

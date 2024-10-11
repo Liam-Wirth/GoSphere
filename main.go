@@ -37,13 +37,13 @@ func main() {
 
 	// Initialize the sphere
 	sphere := &Sphere{
-		Radius:           5,
-		DistanceFromCam:  13,
-		HorizontalOffset: 10,
+		Radius:           1.05,
+		DistanceFromCam:  1.1,
+		HorizontalOffset: 0,
 		VerticalOffset:   0,
 		K1:               20,
 		K2:               1.7,   // Aspect ratio
-		Resolution:       0.020, // Adjust for desired quality
+		Resolution:       0.002, // Adjust for desired quality
 		ColorFunction:    checkerboardColorFunction,
                 RotationSpeed: 0.004,
                 C: math.Pi/3,
