@@ -40,9 +40,9 @@ func renderLoop(s tcell.Screen, quit chan struct{}, cube1 *Cube, sphere *Sphere)
 			sphere.B += sphere.RotationSpeed
                         sphere.A -= sphere.RotationSpeed
 
-                        cube1.A += 0.05
-                        cube1.B += 0.05
-                        cube1.C += 0.01
+                        // cube1.A += 0.05
+                        // cube1.B += 0.05
+                        // cube1.C += 0.01
 			// time.Sleep(time.Millisecond * 16)
 		}
 	}

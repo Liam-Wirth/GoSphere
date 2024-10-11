@@ -37,13 +37,13 @@ func main() {
 
 	// Initialize the sphere
 	sphere := &Sphere{
-		Radius:           1.05,
+		Radius:           1.095,
 		DistanceFromCam:  1.1,
 		HorizontalOffset: 0,
 		VerticalOffset:   0,
 		K1:               20,
 		K2:               1.7,   // Aspect ratio
-		Resolution:       0.002, // Adjust for desired quality
+		Resolution:       0.03, // Adjust for desired quality
 		ColorFunction:    checkerboardColorFunction,
                 RotationSpeed: 0.004,
                 C: math.Pi/3,
@@ -54,7 +54,7 @@ func main() {
 	go handleEvents(s, quit, cube1, sphere)
 
 	// Main rendering loop
-	renderLoop(s, quit, cube1, sphere)
+	 renderLoop(s, quit, cube1, sphere)
 }
 
 func initBuffers() {

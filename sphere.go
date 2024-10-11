@@ -136,6 +136,7 @@ func (sphere *Sphere) Generate(screen tcell.Screen) {
 						color := adjustColorIntensity(point.Color, intensity)
 
 						buffer[idx] = '@'
+						// buffer[idx] = '█'
 						colors[idx] = color
 					}
 				}
@@ -198,7 +199,7 @@ func checkerboardColorFunction(phi, theta float64) tcell.Color {
 	if (u+v)%2 == 0 {
 		return tcell.ColorFuchsia
 	} else {
-		return tcell.ColorBlack
+		return tcell.ColorWhite
 	}
 
 }

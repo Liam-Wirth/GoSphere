@@ -14,9 +14,9 @@ var (
 	backgroundASCIICode rune    = ' '
 	increment           float64 = 0.1
 	autoSpin            bool    = true
-	pi_16               float64 = math.Pi / 8
-	maxWidth            int     = 800 // Adjust as per maximum expected width
-	maxHeight           int     = 400 // Adjust as per maximum expected height
+	pi_16               float64 = math.Pi / 64
+	maxWidth            int     = 1800 // Adjust as per maximum expected width
+	maxHeight           int     = 1400 // Adjust as per maximum expected height
 )
 
 var shading = []rune{'.', '-', '/', '=', '+', '*', '#', '%', '@'}
