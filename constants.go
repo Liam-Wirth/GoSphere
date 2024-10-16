@@ -14,7 +14,7 @@ var (
 	backgroundASCIICode rune    = ' '
 	increment           float64 = 0.1
 	autoSpin            bool    = true
-	pi_16               float64 = math.Pi / 64
+	pi_16               float64 = math.Pi / 32
 	maxWidth            int     = 1800 // Adjust as per maximum expected width
 	maxHeight           int     = 1400 // Adjust as per maximum expected height
 )

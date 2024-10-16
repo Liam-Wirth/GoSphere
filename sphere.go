@@ -22,6 +22,7 @@ type Sphere struct {
 	Resolution       float64
 	ColorFunction    func(phi, theta float64) tcell.Color
 	cameraPos        Vec3
+	lightPos         Vec3
 }
 
 type SpherePoint struct {
@@ -62,8 +63,9 @@ func (sphere *Sphere) BuildSurface() {
 }
 
 func (sphere *Sphere) Generate(screen tcell.Screen) {
-   // TODO: decouple goroutines from sphere rendering and move it to general rendering function, right now cause cube is single threaded, rendering gets blocked if I do 2 shapes at a time
+	// TODO: decouple goroutines from sphere rendering and move it to general rendering function, right now cause cube is single threaded, rendering gets blocked if I do 2 shapes at a time
 	runtime.GOMAXPROCS(runtime.NumCPU()) // Ensure all CPUs are used
+	sphere.lightPos = Vec3{X: 1, Y: 1, Z: -2}
 
 	aspectRatio := sphere.K2
 	K2 := sphere.K1 / aspectRatio
@@ -94,21 +96,21 @@ func (sphere *Sphere) Generate(screen tcell.Screen) {
 
 				rotatedNormal := rotateNormal(normal, cosA, sinA, cosB, sinB, cosC, sinC)
 
-            //  Dynamic lighting, I could theoretically map the x and y values to cursor position, and have it like that
-            // kinda cheating by zooming out lmao
-            // TODO: Uncouple light dir from camera pos in culling 
+				//  Dynamic lighting, I could theoretically map the x and y values to cursor position, and have it like that
+				// kinda cheating by zooming out lmao
+				// TODO: Uncouple light dir from camera pos in culling
 				lightDir := Vec3{
-					X: sphere.cameraPos.X - rotatedPoint.X,
-					Y: sphere.cameraPos.Y - rotatedPoint.Y,
-					Z: sphere.cameraPos.Z - rotatedPoint.Z,
+					X: sphere.lightPos.X - rotatedPoint.X,
+					Y: sphere.lightPos.Y - rotatedPoint.Y,
+					Z: sphere.lightPos.Z - rotatedPoint.Z,
 				}
 				lightDir = normalize(lightDir)
 
-            // this is because the dot product is technically the light direction, they are coupled currently because the code is written such that the light is "supposed" to be coming from the camera
-            // cause cpu i'm minimizing calculations, so if I move the light dir away from the camera pos too much, it fucks with culling/rendering
-            // hence why it looks all weird rn
+				// this is because the dot product is technically the light direction, they are coupled currently because the code is written such that the light is "supposed" to be coming from the camera
+				// cause cpu i'm minimizing calculations, so if I move the light dir away from the camera pos too much, it fucks with culling/rendering
+				// hence why it looks all weird rn
+				// dotProduct := rotatedNormal.X*lightDir.X + rotatedNormal.Y*lightDir.Y + rotatedNormal.Z*lightDir.Z
 				dotProduct := rotatedNormal.X*lightDir.X + rotatedNormal.Y*lightDir.Y + rotatedNormal.Z*lightDir.Z
-
 				if dotProduct < 0 {
 					continue
 				}
@@ -127,14 +129,7 @@ func (sphere *Sphere) Generate(screen tcell.Screen) {
 						zBuffer[idx] = ooz
 
 						intensity := dotProduct
-						if intensity > 10 {
-							intensity = 10
-						} else if intensity < 0.25 {
-							intensity = 0.25
-						}
-
 						color := adjustColorIntensity(point.Color, intensity)
-
 						buffer[idx] = '@'
 						// buffer[idx] = '█'
 						colors[idx] = color
@@ -199,7 +194,7 @@ func checkerboardColorFunction(phi, theta float64) tcell.Color {
 	if (u+v)%2 == 0 {
 		return tcell.ColorFuchsia
 	} else {
-		return tcell.ColorWhite
+		return tcell.ColorBlack
 	}
 
 }

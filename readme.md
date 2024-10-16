@@ -11,4 +11,4 @@
     [ ] look into offloading the computation for rendering to the GPU
     [ ] STL Parsing
     [ ] For the sphere/logic that will be extended for other shapes implement aspect ratio calculation based on given terminal dimensions right now I just guesstimate
-
+    [ ] Refactor so that there is a unified "scene" element that items are placed within, this scene will manage lighting and stuff like that rn I'm just working on the sphere this is for the refactor
