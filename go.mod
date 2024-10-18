@@ -1,4 +1,4 @@
-module github.com/Liam-Wirth/TerminalRenderer
+module github.com/Liam-Wirth/GoSphere
 
 go 1.23.1
 
